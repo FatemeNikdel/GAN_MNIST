@@ -9,32 +9,27 @@ import tensorflow as tf
 
 Batch_size = 32
 
-###########################################     Data      ############################################################
 
-def real_data():
-    x,_, y,_ = tf.keras.datasets.mnist.load_data.mnist()
-
-def Noise_data(noise_dim, Batch_size):
-    x_input_Generator = np.random.randn(noise_dim * Batch_size)               
-    x_input_Generator = x_input_Generator.reshape(Batch_size, noise_dim)
-    return x_input_Generator
 
 ############################################  Generator    ###########################################################
 
-def generator():
+def generator(data):
     n_node = 7 * 7 * 128      # The number of neurons of dense layer
     G_net = tf.keras.models.Sequential([
-                                        tf.keras.layers.Dense(n_node, input_dim = initial_input ),
+                                        tf.keras.layers.Dense(n_node, input_dim = data ),
                                         tf.keras.layers.LeakyReLU(alpha=0.2),
                                         tf.keras.layers.Reshape((7, 7, 128)),
                                         tf.keras.layers.Conv2DTranspose(128, (4,4), strides=(2,2), padding = "same"),
                                         tf.keras.layers.LeakyReLU(alpha=0.2),
                                         tf.keras.layers.Conv2D(64, (4,4), strides = (1,1), padding = "same"),
                                         tf.keras.layers.LeakyReLU(alpha=0.2),
-                                        tf.keras.layers.Conv2DTranspose(1, (4,4), strides = (2,2), activation = "sigmoid", padding = "same"),
+                                        tf.keras.layers.Conv2DTranspose(1, (7,7), strides = (2,2), activation = "sigmoid", padding = "same"),
                                        ])
+    return G_net
 
-########## Descriminator ############
+generator_model = generator(100)
+
+#######################################    Descriminator     ###########################################################
 
 def descriminator():
     d_net = tf.keras.models.Sequential([
@@ -56,3 +51,18 @@ descriminator()
 
 def Gan():
     pass
+
+###########################################     Data      ############################################################
+
+def Noise_data(noise_dim, Batch_size):
+    x_input_Generator = np.random.randn(noise_dim * Batch_size)               
+    x_input_Generator = x_input_Generator.reshape(Batch_size, noise_dim)
+    return x_input_Generator
+
+def fake_data(generator_model, noise_dim, Batch_size):
+    x_input_Generator = Noise_data(noise_dim, Batch_size)
+    X = generator_model.predict(x_input_Generator)
+    y = np.zeros((noise_dim,1))
+    return X, y
+
+'''X , y = fake_data(generator_model, 100, 32)'''
