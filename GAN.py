@@ -5,16 +5,21 @@ import tensorflow as tf
 
 
 
-#########   Variables    ########
-initial_input = np.random.rand(100)
+##########################################   Variables    ############################################################
+
 Batch_size = 32
 
-#########  Real Data    ##########
+###########################################     Data      ############################################################
 
 def real_data():
     x,_, y,_ = tf.keras.datasets.mnist.load_data.mnist()
 
-#########  Generator    ##########
+def Noise_data(noise_dim, Batch_size):
+    x_input_Generator = np.random.randn(noise_dim * Batch_size)               
+    x_input_Generator = x_input_Generator.reshape(Batch_size, noise_dim)
+    return x_input_Generator
+
+############################################  Generator    ###########################################################
 
 def generator():
     n_node = 7 * 7 * 128      # The number of neurons of dense layer
@@ -48,3 +53,6 @@ def descriminator():
     return d_net
 
 descriminator()
+
+def Gan():
+    pass
