@@ -27,7 +27,7 @@ def generator(data):
                                        ])
     return G_net
 
-generator_model = generator(100)
+g_model = generator(100)
 
 #######################################    Descriminator     ###########################################################
 
@@ -47,11 +47,18 @@ def descriminator():
     d_net.summary()
     return d_net
 
-descriminator()
+d_model = descriminator()
+###########################################     GAN        ############################################################
 
-def Gan():
-    pass
 
+def Gan( g_model , d_model):
+    d_model.trainable = False
+    gan_net = tf.keras.models.Sequential([
+        g_model,
+        d_model
+    ])
+    return gan_net
+gan_model = Gan(g_model, d_model)
 ###########################################     Data      ############################################################
 
 def Noise_data(noise_dim, Batch_size):
@@ -65,4 +72,4 @@ def fake_data(generator_model, noise_dim, Batch_size):
     y = np.zeros((noise_dim,1))
     return X, y
 
-'''X , y = fake_data(generator_model, 100, 32)'''
+'''X , y = fake_data(g_model, 100, 32)'''
