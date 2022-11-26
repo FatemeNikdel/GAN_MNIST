@@ -75,9 +75,19 @@ def fake_data(generator_model, noise_dim, Batch_size):
 
 '''X , y = fake_data(g_model, 100, 32)'''
 
-def real_data():
+def Real_data():
     (x_train,_),(_,_) = tf.keras.datasets.mnist.load_data()
     x = np.reshape(x_train,(len(x_train), 28, 28, 1))
     x = x.astype("float32")
     x = x/255
     return x
+real_data = Real_data()
+
+def real_sample(real_data, batch_size):
+    index = np.random.randint(0, len(real_data), batch_size)  # generate random index in size of batch data between [o , len real data]
+    x = real_data(index)                                      # find the data of indexes
+    y = np.ones((batch_size,1))                               # assign the label of real data which is 1
+
+    return x , y
+
+x_real , y_real = real_sample(real_data, Batch_size)
