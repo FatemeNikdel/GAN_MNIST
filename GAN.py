@@ -1,10 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-
-
-
-
 ##########################################   Variables    ############################################################
 
 Batch_size = 32
@@ -78,3 +74,10 @@ def fake_data(generator_model, noise_dim, Batch_size):
     return X, y
 
 '''X , y = fake_data(g_model, 100, 32)'''
+
+def real_data():
+    (x_train,_),(_,_) = tf.keras.datasets.mnist.load_data()
+    x = np.reshape(x_train,(len(x_train), 28, 28, 1))
+    x = x.astype("float32")
+    x = x/255
+    return x
