@@ -57,7 +57,11 @@ def Gan( g_model , d_model):
         g_model,
         d_model
     ])
+
+    opt = tf.keras.optimizers.Adam(leraning_rate = 0.0002, beta_1 = 0.5)
+    gan_net.compile(loss = "binary_crossentropy", metrics = ['accuracy'])
     return gan_net
+
 gan_model = Gan(g_model, d_model)
 ###########################################     Data      ############################################################
 
