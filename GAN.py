@@ -1,5 +1,10 @@
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.pyplot as plt
 
 ##########################################   Variables    ############################################################
 
@@ -62,18 +67,18 @@ gan_model = Gan(g_model, d_model)
 
 ###########################################     Data      ############################################################
 
-def Noise_data(noise_dim, Batch_size):
-    x_input_Generator = np.random.randn(noise_dim * Batch_size)               
-    x_input_Generator = x_input_Generator.reshape(Batch_size, noise_dim)
+def Noise_data(noise_dim, batch_size):
+    x_input_Generator = np.random.randn(noise_dim * batch_size)               
+    x_input_Generator = x_input_Generator.reshape(batch_size, noise_dim)
     return x_input_Generator
 
-def fake_data(generator_model, noise_dim, Batch_size):
-    x_input_Generator = Noise_data(noise_dim, Batch_size)
-    X = generator_model.predict(x_input_Generator)
+def fake_data(g_model, noise_dim, batch_size):
+    x_input_Generator = Noise_data(noise_dim, batch_size)
+    X = g_model.predict(x_input_Generator)
     y = np.zeros((noise_dim,1))
     return X, y
 
-'''X , y = fake_data(g_model, 100, 32)'''
+x_fake , y_fake = fake_data(g_model, 100, 32)
 
 def Real_data():
     (x_train,_),(_,_) = tf.keras.datasets.mnist.load_data()
@@ -91,3 +96,61 @@ def real_sample(real_data, batch_size):
     return x , y
 
 x_real , y_real = real_sample(real_data, Batch_size)
+
+##############################################    showw result     ####################################################
+
+def save_plot(examples, epoch, n=10):
+
+	for i in range(n * n):
+
+		plt.subplot(n, n, 1 + i)
+
+		plt.axis('off')
+
+		plt.imshow(examples[i, :, :, 0], cmap='gray_r')
+
+	filename = 'generated_plot_e%03d.png' % (epoch+1)
+
+	plt.savefig(filename)
+    
+	plt.close()
+
+def summarize_performance(epoch, g_model, d_model, dataset, noise_dim, batch_size=100):
+
+    X_real, y_real = Real_data(dataset, batch_size)
+
+    _, acc_real = d_model.evaluate(X_real, y_real, verbose=0)
+
+    x_fake, y_fake = fake_data(g_model, noise_dim, batch_size)
+
+    _, acc_fake = d_model.evaluate(x_fake, y_fake, verbose=0)
+
+    print(f'>Accuracy real: {acc_real*100}, fake: {acc_fake*100}')
+
+    save_plot(x_fake, epoch)
+
+    filename = f'generator_model_{epoch + 1}.h5'
+
+    g_model.save(filename)
+
+##############################################       Train         #####################################################
+
+def train(d_model, g_model, gan_model, real_data, noise_dim, epochs, batch_size):
+    batch_per_epoch = int(real_data.shape[0] / batch_size)
+    half_batch = int(batch_size/2)
+    for i in range(epochs):
+        for j in range(batch_per_epoch):
+            # train descriminator
+            x_real, y_real = real_sample(real_data, batch_size)
+            x_fake , y_fake = fake_data(g_model, noise_dim, batch_size)
+            X , y = np.vstack((x_real, x_fake)), np.vstack((y_real, y_fake))
+            d_loss , _ = d_model.train_on_batch(X, y)
+            # train gan
+            x_gan = Noise_data(noise_dim, batch_size)
+            y_gan = np.ones((batch_size , 1))
+            g_loss, _ = Gan.train_on_batch(x_gan, y_gan)
+            # show results
+            print( f"===>>>>{i+1},{j+1}/{batch_per_epoch}, d = {d_loss:.3f}, g = {g_loss:.3f}")
+            if (i+1) % 10 == 0:
+                summarize_performance(i, g_model, d_model, real_data, noise_dim)
+
