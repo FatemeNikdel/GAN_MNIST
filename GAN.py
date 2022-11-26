@@ -52,7 +52,7 @@ d_model = descriminator()
 
 
 def Gan( g_model , d_model):
-    d_model.trainable = False
+    d_model.trainable = False                # in order not to train descriminator when generator is training 
     gan_net = tf.keras.models.Sequential([
         g_model,
         d_model
@@ -63,6 +63,7 @@ def Gan( g_model , d_model):
     return gan_net
 
 gan_model = Gan(g_model, d_model)
+
 ###########################################     Data      ############################################################
 
 def Noise_data(noise_dim, Batch_size):
