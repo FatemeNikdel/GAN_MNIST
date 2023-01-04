@@ -87,8 +87,8 @@ real_data = Real_data()
 
 def real_sample(real_data, batch_size):
     index = np.random.randint(0, real_data.shape[0], batch_size)  # generate random index in size of batch data between [o , len real data]
-    x = real_data[index]                                      # find the data of indexes
-    y = np.ones((batch_size,1))                               # assign the label of real data which is 1
+    x = real_data[index]                                          # find the data of indexes
+    y = np.ones((batch_size,1))                                   # assign the label of real data which is 1
 
     return x , y
 
@@ -99,35 +99,21 @@ x_real , y_real = real_sample(real_data, Batch_size)
 def save_plot(examples, epoch, n=10):
 
 	for i in range(n * n):
-
 		plt.subplot(n, n, 1 + i)
-
 		plt.axis('off')
-
 		plt.imshow(examples[i, :, :, 0], cmap='gray_r')
-
 	filename = 'generated_plot_e%03d.png' % (epoch+1)
-
 	plt.savefig(filename)
-    
 	plt.close()
 
 def summarize_performance(epoch, g_model, d_model, dataset, noise_dim, batch_size=100):
-
     X_real, y_real = real_sample(dataset, batch_size)
-
     _, acc_real = d_model.evaluate(X_real, y_real, verbose=0)
-
     x_fake, y_fake = fake_data(g_model, noise_dim, batch_size)
-
     _, acc_fake = d_model.evaluate(x_fake, y_fake, verbose=0)
-
     print(f'>Accuracy real: {acc_real*100}, fake: {acc_fake*100}')
-
     save_plot(x_fake, epoch)
-
     filename = f'generator_model_{epoch + 1}.h5'
-
     g_model.save(filename)
 
 ##############################################       Train         #####################################################
